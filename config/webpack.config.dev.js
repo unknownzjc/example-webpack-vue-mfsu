@@ -1,18 +1,20 @@
 const webpack = require('webpack');
 const { VueLoaderPlugin } = require('vue-loader/dist/index')
 const { MFSU } = require('@umijs/mfsu');
-
+const path = require('path');
+console.log(__dirname)
 const mfsu = new MFSU({
     implementor: webpack,
-    buildDepWithESBuild: {},
+    buildDepWithESBuild: {}
 });
 const config = {
     entry: {
-        main: './src/index.ts'
+        main: [path.resolve('./src/index.ts')]
     },
     mode: 'development',
+    devtool: 'source-map',
     output: {
-        path: __dirname + '/dist',
+        path: path.resolve('./dist'),
         filename: 'bundle.js',
         publicPath: '/'
     },
@@ -40,7 +42,14 @@ const config = {
                 use: {
                     loader: 'babel-loader',
                     options: {
-                        presets: ['@babel/preset-env', '@babel/preset-typescript'],
+                        presets: ['@babel/preset-env',
+                            [
+                                '@babel/preset-typescript',
+                                {
+                                    allExtensions: true,
+                                }
+                            ]
+                        ],
                         plugins: [
                             ...mfsu.getBabelPlugins()
                         ]
@@ -48,19 +57,21 @@ const config = {
                 }
             },
             {
-                test: /\.css$/,
+                test: /\.less$/,
                 use: [
                     'vue-style-loader',
-                    'css-loader'
+                    'css-loader',
+                    'postcss-loader',
+                    'less-loader'
                 ]
             }
         ]
     },
     plugins: [
         new (require('html-webpack-plugin'))({
-            template: __dirname + '/index.html'
+            template: path.resolve('./index.html')
         }),
-        new VueLoaderPlugin(),
+        new VueLoaderPlugin()
     ],
     stats: {
         assets: false,
